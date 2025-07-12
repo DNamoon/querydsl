@@ -672,5 +672,44 @@ public class QuerydslBasicTest {
         assertThat(count).isEqualTo(3L);
     }
 
+    @Test
+    public void sqlFunction() {
+        List<String> result = queryFactory
+            .select(Expressions.stringTemplate(
+                "function('replace', {0}, {1}, {2})",
+                member.username, "member", "M"))
+            .from(member)
+            .fetch();
+
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
+
+    @Test
+    public void sqlFunction2() {
+
+        List<String> result = queryFactory
+            /*
+             db에 대소문자가 섞여있다고 가정해서 대문자로 바꾸고 특정 레코드를 조회하고 싶을 때
+             */
+//            .selectFrom(member)
+//            .where(member.username.upper().eq("MEMBER1"))
+            // 소문자로 바꾸고 비교 -> Expressions.stringTemplate
+//            .where(member.username.eq(
+//                Expressions.stringTemplate(
+//                    "function('lower', {0})", member.username)))
+            //소문자인 레코드 검색
+            .select(member.username)
+            .from(member)
+            .where(member.username.eq(member.username.lower()))
+            .fetch();
+
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+
+        assertThat(result.size( )).isEqualTo(4);
+    }
 
 }
