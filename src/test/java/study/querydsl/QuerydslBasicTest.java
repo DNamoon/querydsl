@@ -5,7 +5,9 @@ import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
@@ -594,5 +596,38 @@ public class QuerydslBasicTest {
                 .where(builder)
                 .fetch();
     }
+
+    @Test
+    public void dynamic_where() {
+        String userCond = "member1";
+        Integer ageCond = 10;
+
+        List<Member> result = searchMember2(userCond, ageCond);
+        assertThat(result.size()).isEqualTo(1);
+    }
+
+    private List<Member> searchMember2(String userCond, Integer ageCond) {
+
+        return queryFactory
+            .selectFrom(member)
+//            .where(usernameEq(userCond), ageEq(ageCond))
+            .where(allEq(userCond, ageCond))
+            .fetch();
+
+    }
+
+    private BooleanExpression usernameEq(String userCond) {
+        return userCond != null ? member.username.eq(userCond) : null;
+    }
+
+    private BooleanExpression ageEq(Integer ageCond) {
+        return ageCond != null ? member.age.eq(ageCond) : null;
+    }
+
+    private BooleanExpression allEq(String userCond, Integer ageCond) {
+        return usernameEq(userCond).and(ageEq(ageCond));
+    }
+
+
 
 }
